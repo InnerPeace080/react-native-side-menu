@@ -57,7 +57,7 @@ class SideMenu extends Component {
       onStartShouldSetResponderCapture: this.props.onStartShouldSetResponderCapture.bind(this),
       onMoveShouldSetPanResponder: this.handleMoveShouldSetPanResponder.bind(this),
       onPanResponderMove: this.handlePanResponderMove.bind(this),
-      onPanResponderRelease: this.handlePanResponderEnd.bind(this),
+      onPanResponderEnd: this.handlePanResponderEnd.bind(this),
     });
   }
 
@@ -87,6 +87,7 @@ class SideMenu extends Component {
    */
   handleMoveShouldSetPanResponder(e: Object, gestureState: Object) {
     if (this.gesturesAreEnabled()) {
+      console.log('handleMoveShouldSetPanResponder');
       const x = Math.round(Math.abs(gestureState.dx));
       const y = Math.round(Math.abs(gestureState.dy));
 
@@ -114,7 +115,9 @@ class SideMenu extends Component {
    * @return {Void}
    */
   handlePanResponderMove(e: Object, gestureState: Object) {
+    console.log('handlePanResponderMove');
     if (this.state.left.__getValue() * this.menuPositionMultiplier() >= 0) {
+      console.log('handlePanResponderMove>>>>>');
       this.state.left.setValue(this.prevLeft + gestureState.dx);
     }
   }
@@ -126,6 +129,7 @@ class SideMenu extends Component {
    * @return {Void}
    */
   handlePanResponderEnd(e: Object, gestureState: Object) {
+    console.log('handlePanResponderEnd');
     const offsetLeft = this.menuPositionMultiplier() *
       (this.state.left.__getValue() + gestureState.dx);
 
@@ -141,6 +145,7 @@ class SideMenu extends Component {
   }
 
   moveLeft(offset) {
+    console.log('moveLeft ' + offset )
     const newOffset = this.menuPositionMultiplier() * offset;
 
     this.props
@@ -195,6 +200,7 @@ class SideMenu extends Component {
   }
 
   onLayoutChange(e) {
+    console.log('onLayoutChange');
     const { width, height, } = e.nativeEvent.layout;
     this.setState({ width, height, });
   }
