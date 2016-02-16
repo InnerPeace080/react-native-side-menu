@@ -87,7 +87,7 @@ class SideMenu extends Component {
    */
   handleMoveShouldSetPanResponder(e: Object, gestureState: Object) {
     if (this.gesturesAreEnabled()) {
-      console.log('handleMoveShouldSetPanResponder');
+      // console.log('handleMoveShouldSetPanResponder');
       const x = Math.round(Math.abs(gestureState.dx));
       const y = Math.round(Math.abs(gestureState.dy));
 
