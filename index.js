@@ -41,10 +41,16 @@ class SideMenu extends React.Component {
     this.isOpen = props.isOpen;
 
     const initialMenuPositionMultiplier = props.menuPosition === 'right' ? -1 : 1
+    const openOffsetMenuPercentage = props.openMenuOffset / deviceScreen.width;
+    const hiddenMenuOffsetPercentage = props.hiddenMenuOffset / deviceScreen.width;
 
     this.state = {
       width: deviceScreen.width,
       height: deviceScreen.height,
+      openOffsetMenuPercentage: openOffsetMenuPercentage,
+      openMenuOffset: deviceScreen.width * openOffsetMenuPercentage,
+      hiddenMenuOffsetPercentage: hiddenMenuOffsetPercentage,
+      hiddenMenuOffset: deviceScreen.width * hiddenMenuOffsetPercentage,
       left: new Animated.Value(
         props.isOpen ? props.openMenuOffset * initialMenuPositionMultiplier : props.hiddenMenuOffset
       ),
@@ -120,10 +126,11 @@ class SideMenu extends React.Component {
     if (this.state.left.__getValue() * this.menuPositionMultiplier() >= 0) {
       let newLeft = this.prevLeft + gestureState.dx;
 
-      if (!this.props.bounceBackOnOverdraw && Math.abs(newLeft) > this.props.openMenuOffset) {
-        newLeft = this.menuPositionMultiplier() * this.props.openMenuOffset;
+      if (!this.props.bounceBackOnOverdraw && Math.abs(newLeft) > this.state.openMenuOffset) {
+        newLeft = this.menuPositionMultiplier() * this.state.openMenuOffset;
       }
 
+      this.props.onMove(newLeft);
       this.state.left.setValue(newLeft);
     }
   }
@@ -164,7 +171,7 @@ class SideMenu extends React.Component {
    * @return {Void}
    */
   openMenu(isOpen) {
-    const { hiddenMenuOffset, openMenuOffset, } = this.props;
+    const { hiddenMenuOffset, openMenuOffset, } = this.state;
     this.moveLeft(isOpen ? openMenuOffset : hiddenMenuOffset);
     this.isOpen = isOpen;
 
@@ -205,7 +212,9 @@ class SideMenu extends React.Component {
 
   onLayoutChange(e) {
     const { width, height, } = e.nativeEvent.layout;
-    this.setState({ width, height, });
+    const openMenuOffset = width * this.state.openOffsetMenuPercentage;
+    const hiddenMenuOffset = width * this.state.hiddenMenuOffsetPercentage;
+    this.setState({ width, height, openMenuOffset, hiddenMenuOffset });
   }
 
   /**
@@ -215,8 +224,8 @@ class SideMenu extends React.Component {
   render() {
 
     const boundryStyle = this.props.menuPosition == 'right' ?
-      {left: deviceScreen.width - this.props.openMenuOffset} :
-      {right: deviceScreen.width - this.props.openMenuOffset} ;
+      {left: this.state.width - this.state.openMenuOffset} :
+      {right: this.state.width - this.state.openMenuOffset} ;
 
     const menu = <View style={[styles.menu, boundryStyle]}>{this.props.menu}</View>;
 
@@ -235,6 +244,7 @@ SideMenu.propTypes = {
   toleranceY: React.PropTypes.number,
   menuPosition: React.PropTypes.oneOf(['left', 'right', ]),
   onChange: React.PropTypes.func,
+  onMove: React.PropTypes.func,
   openMenuOffset: React.PropTypes.number,
   hiddenMenuOffset: React.PropTypes.number,
   disableGestures: React.PropTypes.oneOfType([React.PropTypes.func, React.PropTypes.bool, ]),
@@ -250,6 +260,7 @@ SideMenu.defaultProps = {
   edgeHitWidth: 60,
   openMenuOffset: deviceScreen.width * 2 / 3,
   hiddenMenuOffset: 0,
+  onMove: () => {},
   onStartShouldSetResponderCapture: () => true,
   onChange: () => {},
   animationStyle: (value) => {
